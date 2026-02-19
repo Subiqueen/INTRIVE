@@ -1,0 +1,206 @@
+ <!DOCTYPE html>
+<html>
+<head>
+<title>Smart Interview Prep</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body{margin:0;font-family:Arial;background:#0f172a;color:white}
+header{background:#020617;padding:15px;text-align:center;font-size:22px}
+.container{padding:20px}
+.card{background:#1e293b;padding:20px;border-radius:12px;margin-bottom:20px}
+button{background:#38bdf8;border:none;padding:10px;width:100%;border-radius:8px;font-weight:bold;margin-top:10px}
+input,select{width:100%;padding:10px;margin-top:10px;border-radius:8px;border:none}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:15px}
+.hidden{display:none}
+.chat-box{height:200px;overflow-y:auto;background:#020617;padding:10px;border-radius:10px;margin-bottom:10px}
+.user{color:#38bdf8}
+.bot{color:#22c55e}
+nav button{width:auto;margin:5px}
+</style>
+</head>
+
+<body>
+
+<header>🚀 Smart Interview Preparation Platform</header>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div id="login" class="card">
+<h2>Login</h2>
+<input placeholder="Enter your name" id="username">
+<button onclick="startApp()">Enter</button>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+
+<nav>
+<button onclick="showPage('dashboard')">Dashboard</button>
+<button onclick="showPage('planner')">Study Plan</button>
+<button onclick="showPage('interview')">Mock Interview</button>
+<button onclick="showPage('analytics')">Analytics</button>
+</nav>
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page">
+
+<div class="grid">
+<div class="card">
+<h3>👋 Welcome</h3>
+<p id="displayName"></p>
+</div>
+
+<div class="card">
+<h3>🎯 Target Role</h3>
+<select id="role" onchange="generatePlan()">
+<option>Full Stack Developer</option>
+<option>Frontend Developer</option>
+<option>Data Analyst</option>
+</select>
+</div>
+
+<div class="card">
+<h3>🔥 Readiness</h3>
+<p id="readiness">0%</p>
+</div>
+</div>
+
+<div class="card">
+<h3>📄 Resume Analyzer</h3>
+<input type="file">
+<button onclick="analyzeResume()">Analyze Resume</button>
+<p id="resumeResult"></p>
+</div>
+
+<div class="card">
+<h3>🧠 Skill Gap</h3>
+<p id="skillGap"></p>
+</div>
+
+</div>
+
+<!-- STUDY PLAN -->
+<div id="planner" class="page hidden">
+<div class="card">
+<h3>📅 Auto Study Plan</h3>
+<div id="plan"></div>
+<h3>✅ Progress: <span id="progress">0%</span></h3>
+</div>
+</div>
+
+<!-- MOCK INTERVIEW -->
+<div id="interview" class="page hidden">
+<div class="card">
+<h3>🤖 AI Mock Interview</h3>
+<div class="chat-box" id="chat">
+<p class="bot">Tell me about yourself.</p>
+</div>
+<input id="answer" placeholder="Type your answer">
+<button onclick="sendAnswer()">Send</button>
+</div>
+</div>
+
+<!-- ANALYTICS -->
+<div id="analytics" class="page hidden">
+<div class="card">
+<h3>📊 Performance</h3>
+<canvas id="chart"></canvas>
+</div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+let tasks=[];
+
+function startApp(){
+let name=document.getElementById("username").value;
+localStorage.setItem("name",name);
+document.getElementById("displayName").innerText=name;
+document.getElementById("login").style.display="none";
+document.getElementById("app").classList.remove("hidden");
+generatePlan();
+loadChart();
+}
+
+function showPage(page){
+document.querySelectorAll(".page").forEach(p=>p.classList.add("hidden"));
+document.getElementById(page).classList.remove("hidden");
+}
+
+function analyzeResume(){
+document.getElementById("resumeResult").innerText="✅ HTML, CSS, JS detected";
+document.getElementById("skillGap").innerText="Missing: React, Node.js, MongoDB";
+}
+
+function generatePlan(){
+
+let role=document.getElementById("role").value;
+
+let plans={
+"Full Stack Developer":["Aptitude","DSA","React"],
+"Frontend Developer":["HTML","CSS","JavaScript"],
+"Data Analyst":["Aptitude","SQL","Power BI"]
+};
+
+let planHTML="";
+plans[role].forEach((task,i)=>{
+planHTML+=`<label><input type="checkbox" class="task"> ${task}</label><br>`;
+});
+
+document.getElementById("plan").innerHTML=planHTML;
+
+tasks=document.querySelectorAll(".task");
+
+tasks.forEach(task=>{
+task.addEventListener("change",updateProgress);
+});
+
+updateProgress();
+}
+
+function updateProgress(){
+let total=tasks.length;
+let done=0;
+
+tasks.forEach(t=>{if(t.checked) done++;});
+
+let percent=Math.round((done/total)*100);
+
+document.getElementById("progress").innerText=percent+"%";
+document.getElementById("readiness").innerText=percent+"%";
+
+updateChart(percent);
+}
+
+function sendAnswer(){
+let ans=document.getElementById("answer").value;
+let chat=document.getElementById("chat");
+
+chat.innerHTML+=`<p class="user">${ans}</p>`;
+chat.innerHTML+=`<p class="bot">👍 Good! Improve confidence.</p>`;
+}
+
+function loadChart(){
+window.chart=new Chart(document.getElementById("chart"),{
+type:"doughnut",
+data:{
+labels:["Completed","Remaining"],
+datasets:[{data:[0,100]}]
+}
+});
+}
+
+function updateChart(val){
+chart.data.datasets[0].data=[val,100-val];
+chart.update();
+}
+
+</script>
+
+</body>
+</html>
